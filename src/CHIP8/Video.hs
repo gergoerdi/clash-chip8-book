@@ -4,7 +4,6 @@ module CHIP8.Video where
 import Clash.Prelude
 import RetroClash.VGA
 import RetroClash.Video
-import RetroClash.Delayed
 import RetroClash.Utils
 
 import Data.Maybe
@@ -19,30 +18,30 @@ video
     :: (HiddenClockResetEnable Dom25)
     => Signal Dom25 (Maybe (VidY, VidRow))
     -> (Signal Dom25 Bool, VGAOut Dom25 8 8 8)
-video write = (matchDelay rgb False frameEnd, delayVGA vgaSync rgb)
+video write = (frameEnd, vgaOut vgaSync rgb)
   where
     VGADriver{..} = vgaDriver vga640x480at60
     frameEnd = isFalling False (isJust <$> vgaY)
 
-    vgaX' = fromSignal $ scale (SNat @9) . center @(9 * 64) $ vgaX
-    vgaY' = fromSignal $ scale (SNat @9) . center @(9 * 32) $ vgaY
+    vgaX' = scale (SNat @9) . center @(9 * 64) $ vgaX
+    vgaY' = scale (SNat @9) . center @(9 * 32) $ vgaY
 
     rgb = maybe border palette <$> pixel
 
-    lineStart = isRisingD False $ (isJust <$> vgaX')
-    newY = changedD Nothing vgaY'
-    newX = changedD Nothing vgaX'
+    lineStart = isRising False $ (isJust <$> vgaX')
+    newY = changed Nothing vgaY'
+    newX = changed Nothing vgaX'
     visible = isJust <$> vgaX' .&&. isJust <$> vgaY'
 
     addr = mux lineStart vgaY' (pure Nothing)
-    write' = fmap (first bitCoerce) <$> fromSignal write
-    load = delayedBlockRam1 ClearOnReset (SNat @32) 0x00 (fromMaybe 0 <$> addr) write'
+    write' = fmap (first bitCoerce) <$> write
+    load = blockRam1 ClearOnReset (SNat @32) 0x00 (fromMaybe 0 <$> addr) write'
 
-    row = delayedRegister 0 $ \row ->
-        mux (delayI False $ isJust <$> addr) load $
-        mux (delayI False $ not <$> lineStart .&&. newX) ((`shiftL` 1) <$> row) $
+    row = register 0 $
+        mux (register False $ isJust <$> addr) load $
+        mux (not <$> lineStart .&&. newX) ((`shiftL` 1) <$> row) $
         row
-    pixel = enable (delayI False visible) $ msb <$> row
+    pixel = enable visible $ msb <$> row
 
     border = (0x30, 0x30, 0x50)
 
