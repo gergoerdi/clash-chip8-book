@@ -23,8 +23,8 @@ video write = (frameEnd, vgaOut vgaSync rgb)
     VGADriver{..} = vgaDriver vga640x480at60
     frameEnd = isFalling False (isJust <$> vgaY)
 
-    vgaX' = scale (SNat @9) . center @(9 * 64) $ vgaX
-    vgaY' = scale (SNat @9) . center @(9 * 32) $ vgaY
+    vgaX' = scale @64 (SNat @10) vgaX
+    vgaY' = scale @32 (SNat @10) . center $ vgaY
 
     rgb = maybe border palette <$> pixel
 
