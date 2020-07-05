@@ -22,10 +22,10 @@ topEntity = withEnableGen board
     board keyState = vga
       where
         (frameEnd, vga) = video vidWrite
-        vidWrite = logicBoard "image.bin" frameEnd keyState
+        -- vidWrite = logicBoard "image.bin" frameEnd keyState
 
-        -- ptr = regEn 0 frameEnd $ ptr + 1
-        -- val = regEn 0xaa_aa_aa_aa_aa_aa_aa_aa frameEnd $ complement <$> val
-        -- vidWrite = packWrite <$> ptr <*> (Just <$> val)
+        ptr = regEn 0 frameEnd $ ptr + 1
+        val = regEn 0xaa_aa_aa_aa_aa_aa_aa_aa frameEnd $ complement <$> val
+        vidWrite = packWrite <$> ptr <*> (Just <$> val)
 
 makeTopEntity 'topEntity

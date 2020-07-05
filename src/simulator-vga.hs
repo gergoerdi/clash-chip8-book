@@ -81,7 +81,7 @@ main = withRunner $ \runCycle -> do
   where
     videoParams = MkVideoParams
         { windowTitle = "CHIP-8"
-        , screenScale = 2
+        , screenScale = 4
         , screenRefreshRate = 60
         , reportFPS = True
         }
