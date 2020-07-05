@@ -28,6 +28,11 @@ video write = (frameEnd, vgaOut vgaSync rgb)
 
     rgb = maybe border palette <$> pixel
 
+    border = (0x30, 0x30, 0x50)
+
+    palette 0 = (0x00, 0x00, 0x00)
+    palette 1 = (0xff, 0xcc, 0x33)
+
     lineStart = isRising False $ (isJust <$> vgaX')
     newY = changed Nothing vgaY'
     newX = changed Nothing vgaX'
@@ -42,9 +47,3 @@ video write = (frameEnd, vgaOut vgaSync rgb)
         mux (not <$> lineStart .&&. newX) ((`shiftL` 1) <$> row) $
         row
     pixel = enable visible $ msb <$> row
-
-    border = (0x30, 0x30, 0x50)
-
-    palette :: Bit -> (Unsigned 8, Unsigned 8, Unsigned 8)
-    palette 0 = (0x00, 0x00, 0x00)
-    palette 1 = (0xff, 0xff, 0xff)

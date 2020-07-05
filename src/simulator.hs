@@ -92,7 +92,7 @@ main = do
 
         vidArr <- liftIO $ freeze vid
         return $ rasterizePattern @64 @32 $ \x y ->
-          let fg = (0xe7, 0xc2, 0x51)
+          let fg = (0xff, 0xcc, 0x33)
               bg = (0x50, 0x50, 0x50)
               row = vidArr ! fromIntegral y
           in if testBit row (fromIntegral (maxBound - x)) then fg else bg
